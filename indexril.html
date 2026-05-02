@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sonic-Flow — Where Music Meets Soul</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="stylefix.css" />
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ═══════ LOADING SCREEN ═══════ -->
+  <div id="sf-loader">
+    <div id="sf-loader-inner">
+      <div id="sf-loader-logo">
+        <span class="sf-logo-dev">Sonic</span><span class="sf-logo-zone">-Flow</span>
+      </div>
+      <div id="sf-loader-bar-wrap">
+        <div id="sf-loader-bar"></div>
+      </div>
+      <div id="sf-loader-text">Memuat pengalaman terbaik...</div>
+    </div>
+  </div>
+
+  <!-- CURSOR -->
+  <div id="cursor"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- NAV -->
+  <nav id="main-nav">
+    <a id="nav-logo" href="#home">Sonic-Flow</a>
+    <ul id="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#musik">Musik</a></li>
+      <li><a href="#minigame">Mini Game</a></li>
+      <li><a href="#practice">Practice</a></li>
+      <li><a href="#journal">Journal</a></li>
+      <li><a href="#programer">Programer</a></li>
+      <li><a href="#info">Info</a></li>
+    </ul>
+    <button id="nav-auth-btn" onclick="openAuthModal()">
+      <span id="nav-auth-icon">♩</span>
+      <span id="nav-auth-label">Login</span>
+    </button>
+    <button id="theme-toggle-btn" aria-label="Toggle theme" onclick="toggleTheme()">
+      <span id="theme-icon">🌙</span>
+    </button>
+    <button id="hamburger-btn" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div id="nav-overlay"></div>
+  <div id="mobile-drawer" role="dialog" aria-label="Navigation menu">
+    <button id="drawer-close" aria-label="Close menu">✕</button>
+    <div id="drawer-logo">Sonic-Flow</div>
+    <ul id="drawer-links">
+      <li><a href="#home"      onclick="closeDrawer()">Home</a></li>
+      <li><a href="#musik"     onclick="closeDrawer()">Musik</a></li>
+      <li><a href="#minigame"  onclick="closeDrawer()">Mini Game</a></li>
+      <li><a href="#practice"  onclick="closeDrawer()">Practice</a></li>
+      <li><a href="#journal"   onclick="closeDrawer()">Journal</a></li>
+      <li><a href="#programer" onclick="closeDrawer()">Programer</a></li>
+      <li><a href="#info"      onclick="closeDrawer()">Info</a></li>
+    </ul>
+    <button id="drawer-auth-btn" onclick="openAuthModal(); closeDrawer()">♩ Login / Daftar</button>
+  </div>
+
+  <!-- ══════════════════════════════
+       AUTH MODAL (Login / Register)
+  ══════════════════════════════ -->
+  <div id="auth-modal-overlay" onclick="closeAuthModal()"></div>
+  <div id="auth-modal" role="dialog" aria-label="Login atau Daftar">
+    <button id="auth-modal-close" onclick="closeAuthModal()" aria-label="Tutup">✕</button>
+
+    <div id="auth-modal-logo">Sonic-Flow</div>
+    <p id="auth-modal-sub">Masuk untuk menyimpan jurnalmu</p>
+
+    <!-- Tab Toggle -->
+    <div id="auth-tabs">
+      <button class="auth-tab active" id="tab-login"    onclick="switchAuthTab('login')">Masuk</button>
+      <button class="auth-tab"        id="tab-register" onclick="switchAuthTab('register')">Daftar</button>
+    </div>
+
+    <!-- Form -->
+    <div id="auth-form-wrap">
+      <div class="auth-field">
+        <label for="auth-username">Username</label>
+        <input type="text" id="auth-username" placeholder="contoh: renno_sf" autocomplete="username" maxlength="30" />
+      </div>
+      <div class="auth-field">
+        <label for="auth-password">Password</label>
+        <div class="auth-pw-wrap">
+          <input type="password" id="auth-password" placeholder="Minimal 6 karakter" autocomplete="current-password" />
+          <button type="button" id="auth-pw-toggle" onclick="togglePasswordVisibility()" aria-label="Show password">👁</button>
+        </div>
+      </div>
+      <div id="auth-error" class="auth-msg error" style="display:none;"></div>
+      <div id="auth-success" class="auth-msg success" style="display:none;"></div>
+      <button id="auth-submit-btn" onclick="handleAuthSubmit()">
+        <span id="auth-btn-text">Masuk</span>
+        <span id="auth-btn-spinner" style="display:none;">⟳</span>
+      </button>
+      <div id="auth-switch-hint">
+        Belum punya akun? <button onclick="switchAuthTab('register')">Daftar sekarang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ HOME ═══════ -->
+  <section id="home">
+    <canvas id="rain-canvas"></canvas>
+
+    <!-- Animated SVG blob that follows cursor -->
+    <svg id="blob-svg" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="blobG" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#C9A84C" stop-opacity="0.28"/>
+          <stop offset="60%"  stop-color="#1a5c36" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="#062C1D" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="170" cy="170" rx="145" ry="130" fill="url(#blobG)"/>
+      <g id="wave-group" fill="none" stroke="#C9A84C" stroke-width="1.5" opacity="0.45">
+        <path id="wv1" d=""/>
+        <path id="wv2" d=""/>
+        <path id="wv3" d=""/>
+      </g>
+    </svg>
+
+    <div id="home-content">
+      <p class="eyebrow">Feel Every Beat</p>
+      <h1>Where Music<br>Meets <em>Soul</em></h1>
+      <p class="hero-sub">Discover playlists curated for your mood, test your music knowledge, and vibe with the crew behind it all.</p>
+      <a class="btn-outline" href="#musik">Explore Now</a>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══════ MUSIK ═══════ -->
+  <section id="musik">
+    <h2 class="s-title">Music <em>Moods</em></h2>
+    <p class="s-sub">Choose your vibe — we'll set the soundtrack.</p>
+
+<div id="mood-grid">
+      <div class="mood-card" data-mood="sad" onclick="selectMood(this,'sad')">
+        <span class="mood-glyph">♩</span>
+        <span class="mood-word">melancholy</span>
+        <span class="mood-label">Sad</span>
+        <span class="mood-desc">Let the tears flow with music</span>
+      </div>
+      <div class="mood-card" data-mood="happy" onclick="selectMood(this,'happy')">
+        <span class="mood-glyph">♪</span>
+        <span class="mood-word">euphoria</span>
+        <span class="mood-label">Happy</span>
+        <span class="mood-desc">Bright energy, brighter days</span>
+      </div>
+      <div class="mood-card" data-mood="angry" onclick="selectMood(this,'angry')">
+        <span class="mood-glyph">♯</span>
+        <span class="mood-word">intensity</span>
+        <span class="mood-label">Angry</span>
+        <span class="mood-desc">Channel the fire within</span>
+      </div>
+      <div class="mood-card" data-mood="bored" onclick="selectMood(this,'bored')">
+        <span class="mood-glyph">♫</span>
+        <span class="mood-word">wandering</span>
+        <span class="mood-label">Bored</span>
+        <span class="mood-desc">Drift into another world</span>
+      </div>
+    </div>
+
+    <div id="spotify-wrap">
+      <div id="spotify-ph">
+        ↑ Pilih mood kamu untuk load playlist<br>
+        <small style="opacity:0.6; font-size:0.78rem;">Setelah kamu isi Spotify Playlist ID di script, embed akan muncul di sini</small>
+      </div>
+      <div id="spotify-embed"></div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══════ MINI GAME ═══════ -->
+  <section id="minigame">
+    <h2 class="s-title">Guess the <em>Song</em></h2>
+    <p class="s-sub">Seberapa hafal kamu sama lagu hits? Buktikan!</p>
+
+    <div id="game-box">
+
+      <div id="game-player">
+        <button id="play-btn" onclick="togglePlay()">▶</button>
+        <div id="song-info">
+          <div id="song-title">Tekan play untuk mulai</div>
+          <div id="song-artist">—</div>
+        </div>
+      </div>
+
+      <div id="progress-bar"><div id="progress-fill"></div></div>
+      <div id="progress-time">0:00 / 0:30</div>
+
+      <div id="visualizer-wrap">
+        <canvas id="viz-canvas"></canvas>
+        <div id="viz-idle"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+
+      <div id="question">Lagu apa yang sedang diputar?</div>
+      <div id="answers"></div>
+
+      <div id="scoreboard">
+        <div class="sc-item"><span class="sc-num" id="sc-score">0</span><span class="sc-lbl">Score</span></div>
+        <div class="sc-item"><span class="sc-num" id="sc-streak">0</span><span class="sc-lbl">Streak</span></div>
+        <div class="sc-item"><span class="sc-num" id="sc-round">1</span><span class="sc-lbl">Round</span></div>
+        <div class="sc-item"><span class="sc-num" id="sc-total">10</span><span class="sc-lbl">Total</span></div>
+        <div class="sc-item sc-item--highlight">
+          <span class="sc-num" id="sc-highscore">0</span>
+          <span class="sc-lbl">Best ★</span>
+        </div>
+      </div>
+    </div>
+    <div id="particle-burst" aria-hidden="true"></div>
+
+    <div id="feedback-pop"></div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══════ MEMORY CARD GAME ═══════ -->
+  <section id="memorygame">
+    <h2 class="s-title">Memory <em>Card</em></h2>
+    <p class="s-sub">Cocokkan semua kartu — Uji daya ingatmu!</p>
+
+    <div class="mc-game-container">
+      <div class="mc-game-header">
+        <div class="mc-level-badge" id="mc-levelBadge">LEVEL 1</div>
+        <div class="mc-score-timer">
+          <div class="mc-score-box">SCORE: <span id="mc-scoreValue">0</span></div>
+          <div class="mc-timer-box">⏱ TIME: <span id="mc-timerValue">00:00</span></div>
+        </div>
+        <button class="mc-restart-btn" id="mc-restartBtn">RESTART</button>
+      </div>
+
+      <div class="mc-level-progress" id="mc-progressContainer"></div>
+      <div class="mc-cards-grid" id="mc-cardsGrid"></div>
+      <div id="mc-difficultyInfo" style="text-align:center; color:var(--muted); margin-top:10px; font-size:0.88rem;"></div>
+    </div>
+
+    <div id="mc-overlay" class="mc-overlay">
+      <div class="mc-popup">
+        <h2 id="mc-popupTitle">LEVEL COMPLETE!</h2>
+        <p id="mc-popupMessage">Klik tombol untuk lanjut</p>
+        <button id="mc-nextLevelBtn" class="mc-next-btn">LANJUT</button>
+      </div>
+    </div>
+
+    <div id="mc-toast" class="mc-toast"></div>
+  </section>
+
+  <script>
+  (function() {
+    const MC_LEVELS = [
+      { name: "LEVEL 1", pairs: 4, cols: 4 },
+      { name: "LEVEL 2", pairs: 6, cols: 4 },
+      { name: "LEVEL 3", pairs: 8, cols: 4 },
+      { name: "LEVEL 4", pairs: 10, cols: 5 },
+      { name: "LEVEL 5", pairs: 12, cols: 6 }
+    ];
+    const MC_MAX_LEVEL = MC_LEVELS.length;
+
+    let mc_currentLevel = 0;
+    let mc_cards = [];
+    let mc_openedIndexes = [];
+    let mc_locked = false;
+    let mc_score = 0;
+    let mc_seconds = 0;
+    let mc_timer = null;
+    let mc_matchedPairs = 0;
+    let mc_gameRunning = true;
+
+    const mc_grid = document.getElementById("mc-cardsGrid");
+    const mc_levelBadge = document.getElementById("mc-levelBadge");
+    const mc_scoreSpan = document.getElementById("mc-scoreValue");
+    const mc_timerSpan = document.getElementById("mc-timerValue");
+    const mc_restartBtn = document.getElementById("mc-restartBtn");
+    const mc_progressContainer = document.getElementById("mc-progressContainer");
+    const mc_overlay = document.getElementById("mc-overlay");
+    const mc_popupTitle = document.getElementById("mc-popupTitle");
+    const mc_popupMessage = document.getElementById("mc-popupMessage");
+    const mc_nextLevelBtn = document.getElementById("mc-nextLevelBtn");
+    const mc_toast = document.getElementById("mc-toast");
+    const mc_difficultyInfo = document.getElementById("mc-difficultyInfo");
+
+    function mc_showToast(msg) {
+      mc_toast.innerText = msg;
+      mc_toast.classList.add("mc-show");
+      setTimeout(() => mc_toast.classList.remove("mc-show"), 1200);
+    }
+
+    function mc_formatTime(sec) {
+      let m = Math.floor(sec / 60);
+      let s = sec % 60;
+      return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+
+    function mc_updateTimerUI() { mc_timerSpan.innerText = mc_formatTime(mc_seconds); }
+    function mc_updateScoreUI() { mc_scoreSpan.innerText = mc_score; }
+
+    function mc_stopTimer() { if (mc_timer) { clearInterval(mc_timer); mc_timer = null; } }
+    function mc_startTimer() {
+      if (mc_timer) mc_stopTimer();
+      mc_timer = setInterval(() => {
+        if (mc_gameRunning && !mc_locked) {
+          mc_seconds++;
+          mc_updateTimerUI();
+        }
+      }, 1000);
+    }
+
+    function mc_shootConfetti() {
+      if (window.canvasConfetti) {
+        window.canvasConfetti({ particleCount: 180, spread: 360, origin: { x: 0.5, y: 0.5 }, startVelocity: 25, colors: ['#ffd700','#ff6b6b','#4ecdc4','#95e77a','#ff8c42'], decay: 0.9 });
+        setTimeout(() => { window.canvasConfetti({ particleCount: 250, spread: 360, origin: { x: 0.5, y: 0.5 }, startVelocity: 30, colors: ['#ffd700','#ff6b6b','#4ecdc4','#95e77a','#ff8c42','#e74c3c'], decay: 0.85 }); }, 150);
+        setTimeout(() => { window.canvasConfetti({ particleCount: 300, spread: 360, origin: { x: 0.5, y: 0.5 }, startVelocity: 35, colors: ['#FFD700','#FF6B6B','#4ECDC4','#FFE66D','#FF8C42','#E74C3C','#2ECC71'], decay: 0.8 }); }, 350);
+      } else {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1';
+        s.onload = () => mc_shootConfetti();
+        document.head.appendChild(s);
+      }
+    }
+
+    function mc_showFloatingText(text) {
+      const div = document.createElement('div');
+      div.className = 'mc-floating-level';
+      div.innerText = text;
+      document.body.appendChild(div);
+      setTimeout(() => { if (div && div.remove) div.remove(); }, 1200);
+    }
+
+    function mc_generateCards(pairsCount) {
+      const icons = ["javascript","css","hello word","react","github","ctrl + v","FUNK","html","ctrl + c","pyhton","php","laravel"];
+      let selected = [];
+      for (let i = 0; i < pairsCount; i++) selected.push(icons[i % icons.length]);
+      let deck = [...selected, ...selected];
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      return deck;
+    }
+
+    function mc_buildBoard() {
+      const level = MC_LEVELS[mc_currentLevel];
+      const pairs = level.pairs;
+      const cols = level.cols;
+      const iconsList = mc_generateCards(pairs);
+
+      mc_cards = [];
+      mc_openedIndexes = [];
+      mc_locked = false;
+      mc_matchedPairs = 0;
+      mc_gameRunning = true;
+
+      for (let i = 0; i < iconsList.length; i++) {
+        mc_cards.push({ id: i, icon: iconsList[i], matched: false, flipped: false });
+      }
+
+      mc_grid.style.display = "grid";
+      mc_grid.style.gridTemplateColumns = `repeat(${cols}, minmax(60px, 90px))`;
+      mc_grid.innerHTML = "";
+
+      mc_cards.forEach((card, idx) => {
+        const cardDiv = document.createElement("div");
+        cardDiv.className = "mc-card";
+        if (card.matched) cardDiv.classList.add("mc-matched");
+
+        const inner = document.createElement("div");
+        inner.className = "mc-card-inner";
+
+        const front = document.createElement("div");
+        front.className = "mc-card-front";
+        front.innerText = card.icon;
+
+        const back = document.createElement("div");
+        back.className = "mc-card-back";
+
+        inner.appendChild(back);
+        inner.appendChild(front);
+        cardDiv.appendChild(inner);
+
+        cardDiv.addEventListener("click", () => {
+          if (!mc_gameRunning) return;
+          if (mc_locked) return;
+          if (card.matched) return;
+          if (card.flipped) return;
+          if (mc_openedIndexes.length >= 2) return;
+
+          card.flipped = true;
+          cardDiv.classList.add("mc-flipped");
+          mc_openedIndexes.push(idx);
+
+          if (mc_openedIndexes.length === 2) {
+            mc_locked = true;
+            mc_checkMatch();
+          }
+        });
+
+        card.element = cardDiv;
+        mc_grid.appendChild(cardDiv);
+      });
+
+      mc_difficultyInfo.innerHTML = ` ${pairs} pasang kartu | Total: ${pairs * 2} kartu`;
+    }
+
+    function mc_closeCard(index) {
+      const card = mc_cards[index];
+      if (!card.flipped) return;
+      card.flipped = false;
+      card.element.classList.remove("mc-flipped");
+    }
+
+    function mc_checkMatch() {
+      const idx1 = mc_openedIndexes[0];
+      const idx2 = mc_openedIndexes[1];
+      const card1 = mc_cards[idx1];
+      const card2 = mc_cards[idx2];
+
+      if (card1.icon === card2.icon) {
+        card1.matched = true;
+        card2.matched = true;
+        card1.element.classList.add("mc-matched");
+        card2.element.classList.add("mc-matched");
+        mc_score += 10;
+        mc_updateScoreUI();
+        mc_matchedPairs++;
+        mc_showToast(" MATCH! +10");
+        mc_openedIndexes = [];
+        mc_locked = false;
+        if (mc_matchedPairs === MC_LEVELS[mc_currentLevel].pairs) mc_levelComplete();
+      } else {
+        mc_showToast(" NOT MATCH!");
+        setTimeout(() => {
+          if (!mc_cards[idx1].matched) mc_closeCard(idx1);
+          if (!mc_cards[idx2].matched) mc_closeCard(idx2);
+          mc_openedIndexes = [];
+          mc_locked = false;
+        }, 600);
+      }
+    }
+
+    function mc_levelComplete() {
+      mc_gameRunning = false;
+      mc_stopTimer();
+      const isLastLevel = (mc_currentLevel === MC_MAX_LEVEL - 1);
+      mc_shootConfetti();
+      if (isLastLevel) {
+        mc_showFloatingText("VICTORY!");
+        mc_popupTitle.innerHTML = "CHAMPION!";
+        mc_popupMessage.innerHTML = `Final Score: ${mc_score} | Time: ${mc_formatTime(mc_seconds)}`;
+        mc_nextLevelBtn.innerHTML = "PLAY AGAIN";
+        mc_nextLevelBtn.classList.add("mc-victory-btn");
+      } else {
+        mc_showFloatingText(`NEXT ${MC_LEVELS[mc_currentLevel + 1].name}`);
+        mc_popupTitle.innerHTML = `LEVEL ${mc_currentLevel + 1} COMPLETE!`;
+        mc_popupMessage.innerHTML = `Score: ${mc_score} | Time: ${mc_formatTime(mc_seconds)}`;
+        mc_nextLevelBtn.innerHTML = `PLAY LEVEL ${mc_currentLevel + 2} `;
+        mc_nextLevelBtn.classList.remove("mc-victory-btn");
+      }
+      mc_overlay.classList.add("mc-show-overlay");
+    }
+
+    function mc_goToNextLevel() {
+      mc_overlay.classList.remove("mc-show-overlay");
+      const isLastLevel = (mc_currentLevel === MC_MAX_LEVEL - 1);
+      if (isLastLevel) { mc_fullRestart(); } else { mc_currentLevel++; mc_loadLevel(); }
+    }
+
+    function mc_loadLevel() {
+      mc_stopTimer();
+      mc_seconds = 0;
+      mc_updateTimerUI();
+      mc_openedIndexes = [];
+      mc_locked = false;
+      mc_matchedPairs = 0;
+      mc_gameRunning = true;
+      mc_levelBadge.innerHTML = MC_LEVELS[mc_currentLevel].name;
+      mc_updateProgress();
+      mc_buildBoard();
+      mc_startTimer();
+      mc_showToast(`${MC_LEVELS[mc_currentLevel].name}`);
+    }
+
+    function mc_fullRestart() {
+      mc_stopTimer();
+      mc_currentLevel = 0;
+      mc_score = 0;
+      mc_seconds = 0;
+      mc_matchedPairs = 0;
+      mc_updateScoreUI();
+      mc_updateTimerUI();
+      mc_gameRunning = true;
+      mc_levelBadge.innerHTML = MC_LEVELS[0].name;
+      mc_updateProgress();
+      mc_buildBoard();
+      mc_startTimer();
+      mc_overlay.classList.remove("mc-show-overlay");
+      mc_showToast("RESTART ");
+    }
+
+    function mc_updateProgress() {
+      mc_progressContainer.innerHTML = "";
+      for (let i = 0; i < MC_MAX_LEVEL; i++) {
+        const dot = document.createElement("div");
+        dot.classList.add("mc-progress-dot");
+        if (i === mc_currentLevel) dot.classList.add("mc-active");
+        if (i < mc_currentLevel) dot.classList.add("mc-completed");
+        mc_progressContainer.appendChild(dot);
+      }
+    }
+
+    mc_restartBtn.addEventListener("click", () => { mc_fullRestart(); });
+    mc_nextLevelBtn.addEventListener("click", () => { mc_goToNextLevel(); });
+
+    mc_currentLevel = 0;
+    mc_score = 0;
+    mc_seconds = 0;
+    mc_matchedPairs = 0;
+    mc_updateScoreUI();
+    mc_updateTimerUI();
+    mc_levelBadge.innerHTML = MC_LEVELS[0].name;
+    mc_updateProgress();
+    mc_buildBoard();
+    mc_startTimer();
+    mc_gameRunning = true;
+  })();
+  </script>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══════ SUPER MARIO GAME ═══════ -->
+  <section id="supermario">
+    <h2 class="s-title">Super <em>Mario</em></h2>
+    <p class="s-sub">Petualangan pixel art klasik — lompati musuh, kumpulkan koin, raih bendera!</p>
+
+    <div class="sm-game-wrapper">
+      <!-- HUD -->
+      <div class="sm-hud" id="sm-hud">
+        <div class="sm-hud-block">
+          <div class="sm-hud-label">MARIO</div>
+          <div class="sm-hud-val sm-red" id="sm-h-lives">♥ ♥ ♥</div>
+        </div>
+        <div class="sm-hud-block">
+          <div class="sm-hud-label">SCORE</div>
+          <div class="sm-hud-val" id="sm-h-score">000000</div>
+        </div>
+        <div class="sm-hud-block">
+          <div class="sm-hud-label">COINS</div>
+          <div class="sm-hud-val sm-green" id="sm-h-coins">✦ 00</div>
+        </div>
+        <div class="sm-hud-block">
+          <div class="sm-hud-label">WORLD</div>
+          <div class="sm-hud-val">1 - 1</div>
+        </div>
+        <div class="sm-hud-block">
+          <div class="sm-hud-label">TIME</div>
+          <div class="sm-hud-val" id="sm-h-time">300</div>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <canvas id="sm-game-canvas" width="800" height="400"></canvas>
+
+      <!-- Controls bar -->
+      <div class="sm-controls-bar">
+        <div class="sm-ctrl-hint"><span>← →</span> Gerak &nbsp; <span>↑ / SPACE</span> Lompat &nbsp; <span>R</span> Restart</div>
+        <div class="sm-ctrl-hint">Capai <span>BENDERA</span> untuk menang!</div>
+      </div>
+    </div>
+
+    <!-- Win Screen (inside section, not fixed) -->
+    <div id="sm-win-screen" class="sm-win-screen">
+      <div class="sm-win-box">
+        <h3>YOU WIN!</h3>
+        <div class="sm-win-subtitle">COURSE CLEAR !</div>
+        <div class="sm-score-row">
+          <div class="sm-score-item"><div class="sm-s-lbl">SCORE</div><div class="sm-s-val" id="sm-ws-score">0</div></div>
+          <div class="sm-score-item"><div class="sm-s-lbl">COINS</div><div class="sm-s-val" id="sm-ws-coins">0</div></div>
+          <div class="sm-score-item"><div class="sm-s-lbl">TIME</div><div class="sm-s-val" id="sm-ws-time">0</div></div>
+        </div>
+        <button id="sm-play-again" class="sm-play-again-btn">▶ MAIN LAGI</button>
+      </div>
+    </div>
+
+    <!-- Confetti canvas (absolute inside wrapper) -->
+    <canvas id="sm-confetti-canvas" class="sm-confetti-canvas"></canvas>
+
+    <!-- Touch Controls -->
+    <div id="sm-touch-controls" class="sm-touch-controls">
+      <div style="display:flex;gap:12px;">
+        <div class="sm-touch-btn" id="sm-btn-left">◀</div>
+        <div class="sm-touch-btn" id="sm-btn-right">▶</div>
+      </div>
+      <div class="sm-touch-btn" id="sm-btn-jump">▲</div>
+    </div>
+  </section>
+
+  <script>
+  // ============================================================
+  // SUPER MARIO - HUTAN CANDI PIXEL ART (embedded in Sonic-Flow)
+  // ============================================================
+  (function() {
+
+  const canvas = document.getElementById('sm-game-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = 800, H = 400;
+  ctx.imageSmoothingEnabled = false;
+
+  const cc = document.getElementById('sm-confetti-canvas');
+  const cctx = cc.getContext('2d');
+  function resizeCC() { cc.width = cc.offsetWidth || 800; cc.height = cc.offsetHeight || 400; }
+  resizeCC();
+  window.addEventListener('resize', resizeCC);
+
+  // ── CONSTANTS & PALETTE ──
+  const TS = 16;
+  const WORLD_W = 3200;
+  const GRAVITY = 0.45;
+  const JUMP_FORCE = -8.5;
+  const MOVE_SPD = 2.8;
+
+  const PAL = {
+    sky1:'#1a1a2e',sky2:'#16213e',sky3:'#0f3460',
+    leaf1:'#1a4a1a',leaf2:'#2d7a2d',leaf3:'#4aaa4a',leaf4:'#1f6b1f',
+    trunk:'#5c3a1e',trunkDark:'#3d2510',
+    vine:'#2d5a2d',vineLeaf:'#3d8b3d',
+    stone1:'#6b6060',stone2:'#8a7a7a',stone3:'#4a3e3e',
+    stoneDark:'#2d2424',stoneLight:'#b0a0a0',
+    moss1:'#3a6b3a',moss2:'#2a4a2a',
+    groundTop:'#5a8a2a',groundMid:'#8b6914',groundBot:'#5c3a1e',groundDark:'#4a2e10',
+    mRed:'#e52222',mBlue:'#2244cc',mSkin:'#ffbb77',mHat:'#cc1111',
+    mShoe:'#7744aa',mBelt:'#ffdd00',
+    kShell:'#4aaa4a',kSkin:'#ffbb77',kFoot:'#ffbb77',
+    gBrown:'#994422',gFoot:'#cc6633',gEye:'#fff',
+    qOrange:'#ffaa00',qYellow:'#ffdd44',qDark:'#cc7700',
+    bRed:'#cc5533',bDark:'#882211',bMortar:'#ddaa88',
+    cGold:'#ffdd00',cGoldDark:'#cc9900',
+    flRed:'#ff2200',flWhite:'#ffffff',
+    flagGreen:'#00cc00',poleGrey:'#999999',
+    sparkYellow:'#ffff00',sparkOrange:'#ff8800',
+  };
+
+  // ── GAME STATE ──
+  let sm_score=0,sm_coins=0,sm_lives=3,sm_gameTime=300;
+  let sm_gameOver=false,sm_won=false,sm_flagReached=false;
+  let sm_timerInterval=null;
+  let sm_keys={};
+  let sm_cam=0;
+  let sm_frameCount=0;
+
+  // ── PIXEL ART HELPERS ──
+  function px(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.floor(x),Math.floor(y),w,h);}
+  function drawPixelText(text,x,y,size,color,shadow){
+    ctx.save();
+    if(shadow){ctx.fillStyle=shadow;ctx.font=`bold ${size}px 'Courier New'`;ctx.fillText(text,x+2,y+2);}
+    ctx.fillStyle=color;ctx.font=`bold ${size}px 'Courier New'`;ctx.fillText(text,x,y);
+    ctx.restore();
+  }
+
+  // ── WORLD DEFINITION ──
+  const SM_QBLOCKS=[
+    {x:288,y:H-32-96,hit:false,coin:true},{x:320,y:H-32-96,hit:false,coin:true},
+    {x:304,y:H-32-96-32,hit:false,coin:true},{x:560,y:H-32-80,hit:false,coin:true},
+    {x:832,y:H-32-112,hit:false,coin:true},{x:1232,y:H-32-96,hit:false,coin:true},
+    {x:1552,y:H-32-80,hit:false,coin:true},{x:1920,y:H-32-96,hit:false,coin:true},
+    {x:2128,y:H-32-112,hit:false,coin:true},{x:2400,y:H-32-96,hit:false,coin:true},
+    {x:2640,y:H-32-96,hit:false,coin:true},{x:2832,y:H-32-112,hit:false,coin:true},
+  ];
+  const SM_PIPES=[
+    {x:400,y:H-32-64,w:32,h:64},{x:650,y:H-32-80,w:32,h:80},
+    {x:1140,y:H-32-64,w:32,h:64},{x:1680,y:H-32-80,w:32,h:80},
+    {x:2200,y:H-32-64,w:32,h:64},{x:2700,y:H-32-96,w:32,h:96},
+  ];
+  const SM_TEMPLE_STEPS=[];
+  for(let i=0;i<8;i++) SM_TEMPLE_STEPS.push({x:2950+i*TS,y:H-32-(i+1)*TS,w:TS,h:(i+1)*TS});
+
+  const SM_FLAG_X=3100,SM_FLAG_Y=H-32-192,SM_FLAG_H=192;
+
+  const SM_COIN_ITEMS_BASE=[];
+  [120,160,200,320,370,420,490,600,700,760,900,1000,1160,1240,1320,1420,1600,1700,1960,2060,2150,2250,2450,2550,2680,2780,2900].forEach(x=>{SM_COIN_ITEMS_BASE.push({x,y:H-32-24,collected:false});});
+  [270,286,302,318,530,546,800,816,1210,1226,1530,1546].forEach(x=>{SM_COIN_ITEMS_BASE.push({x,y:H-32-80-20,collected:false});});
+
+  function sm_makeSolids(){
+    const solids=[];
+    for(let x=0;x<WORLD_W;x+=TS){
+      const inPit=(x>=1024&&x<1104)||(x>=1800&&x<1880)||(x>=2500&&x<2564);
+      if(!inPit) solids.push({x,y:H-32,w:TS,h:32,type:'ground'});
+    }
+    const brickRows=[
+      {x:256,y:H-32-80,count:5},{x:512,y:H-32-64,count:4},{x:768,y:H-32-96,count:3},
+      {x:1200,y:H-32-80,count:6},{x:1500,y:H-32-64,count:5},{x:1900,y:H-32-80,count:4},
+      {x:2100,y:H-32-96,count:5},{x:2300,y:H-32-64,count:4},{x:2600,y:H-32-80,count:6},{x:2800,y:H-32-96,count:4},
+    ];
+    brickRows.forEach(r=>{for(let i=0;i<r.count;i++) solids.push({x:r.x+i*TS,y:r.y,w:TS,h:TS,type:'brick'});});
+    SM_QBLOCKS.forEach(q=>solids.push({x:q.x,y:q.y,w:TS,h:TS,type:'qblock',ref:q}));
+    SM_PIPES.forEach(p=>solids.push({x:p.x,y:p.y,w:p.w,h:p.h,type:'pipe'}));
+    SM_TEMPLE_STEPS.forEach(s=>solids.push({x:s.x,y:s.y,w:s.w,h:s.h,type:'stone'}));
+    return solids;
+  }
+
+  function sm_makeEnemies(){
+    const goombas=[
+      {x:300,y:0,vx:-1,alive:true,type:'goomba'},{x:450,y:0,vx:-1,alive:true,type:'goomba'},
+      {x:620,y:0,vx:-1,alive:true,type:'goomba'},{x:900,y:0,vx:-1,alive:true,type:'goomba'},
+      {x:1100,y:0,vx:-1,alive:true,type:'goomba'},{x:1280,y:0,vx:-1,alive:true,type:'goomba'},
+      {x:1450,y:0,vx:-1,alive:true,type:'goomba'},{x:1700,y:0,vx:-1,alive:true,type:'goomba'},
+      {x:1950,y:0,vx:-1,alive:true,type:'goomba'},{x:2050,y:0,vx:-1,alive:true,type:'goomba'},
+      {x:2250,y:0,vx:-1,alive:true,type:'goomba'},{x:2450,y:0,vx:-1,alive:true,type:'goomba'},
+      {x:2600,y:0,vx:-1,alive:true,type:'goomba'},{x:2750,y:0,vx:-1,alive:true,type:'goomba'},
+      {x:2900,y:0,vx:-1,alive:true,type:'goomba'},
+      {x:560,y:0,vx:-0.8,alive:true,type:'koopa'},{x:1380,y:0,vx:-0.8,alive:true,type:'koopa'},
+      {x:2170,y:0,vx:-0.8,alive:true,type:'koopa'},{x:2850,y:0,vx:-0.8,alive:true,type:'koopa'},
+    ];
+    goombas.forEach(g=>g.y=H-32-g.y-16);
+    return goombas;
+  }
+
+  let sm_solids=sm_makeSolids();
+  let sm_enemies=sm_makeEnemies();
+  let sm_coinItems=JSON.parse(JSON.stringify(SM_COIN_ITEMS_BASE));
+  let sm_coinAnims=[],sm_scorePopups=[],sm_particles=[];
+  let sm_mario={};
+
+  function sm_resetMario(){
+    sm_mario={x:64,y:H-32-32,w:14,h:26,vx:0,vy:0,onGround:false,dir:1,dying:false,deadTimer:0,invincible:0,walkFrame:0,walkTimer:0};
+    sm_cam=0;
+  }
+  sm_resetMario();
+
+  // ── COLLISION ──
+  function sm_rectsOverlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+  function sm_resolveCollisions(obj,solidsArr){
+    obj.onGround=false;
+    obj.x+=obj.vx; obj.x=Math.max(0,Math.min(obj.x,WORLD_W-obj.w));
+    for(const s of solidsArr){
+      if(sm_rectsOverlap(obj,s)){
+        if(obj.vx>0) obj.x=s.x-obj.w; else if(obj.vx<0) obj.x=s.x+s.w; obj.vx=0;
+      }
+    }
+    obj.y+=obj.vy;
+    for(const s of solidsArr){
+      if(sm_rectsOverlap(obj,s)){
+        if(obj.vy>0){obj.y=s.y-obj.h;obj.vy=0;obj.onGround=true;}
+        else if(obj.vy<0){
+          obj.y=s.y+s.h;
+          if(s.type==='qblock'&&s.ref&&!s.ref.hit){
+            s.ref.hit=true;sm_score+=200;sm_coins++;
+            sm_coinAnims.push({x:s.ref.x+4,y:s.ref.y,vy:-5,life:50,maxLife:50});
+            sm_scorePopups.push({x:s.ref.x,y:s.ref.y-8,val:'+200',life:60});
+            sm_spawnParticles(s.ref.x+8,s.ref.y,6,PAL.cGold);
+          }
+          obj.vy=0.5;
+        }
+      }
+    }
+    if(obj.y>H+80) obj.falling=true;
+  }
+
+  // ── UPDATE MARIO ──
+  function sm_updateMario(){
+    if(sm_mario.dying){
+      sm_mario.deadTimer++;sm_mario.vy+=0.55;sm_mario.y+=sm_mario.vy;
+      if(sm_mario.deadTimer>90){sm_lives--;if(sm_lives<=0){sm_gameOver=true;return;}sm_resetMario();}
+      return;
+    }
+    if(sm_mario.invincible>0) sm_mario.invincible--;
+    const goLeft=sm_keys['ArrowLeft']||sm_keys['KeyA']||sm_keys['sm_left'];
+    const goRight=sm_keys['ArrowRight']||sm_keys['KeyD']||sm_keys['sm_right'];
+    const doJump=sm_keys['Space']||sm_keys['ArrowUp']||sm_keys['KeyW']||sm_keys['sm_jump'];
+    if(goLeft){sm_mario.vx=-MOVE_SPD;sm_mario.dir=-1;}
+    else if(goRight){sm_mario.vx=MOVE_SPD;sm_mario.dir=1;}
+    else sm_mario.vx*=0.72;
+    if(doJump&&sm_mario.onGround){sm_mario.vy=JUMP_FORCE;sm_mario.onGround=false;}
+    sm_mario.vy+=GRAVITY;if(sm_mario.vy>14) sm_mario.vy=14;
+    if(Math.abs(sm_mario.vx)>0.5&&sm_mario.onGround){
+      sm_mario.walkTimer++;if(sm_mario.walkTimer>6){sm_mario.walkFrame=(sm_mario.walkFrame+1)%4;sm_mario.walkTimer=0;}
+    }
+    sm_resolveCollisions(sm_mario,sm_solids);
+    if(sm_mario.falling){sm_mario.dying=true;sm_mario.vy=-6;sm_mario.falling=false;}
+    sm_cam=sm_mario.x-W*0.35;if(sm_cam<0) sm_cam=0;if(sm_cam>WORLD_W-W) sm_cam=WORLD_W-W;
+    sm_coinItems.forEach(c=>{
+      if(c.collected) return;
+      if(sm_rectsOverlap(sm_mario,{x:c.x,y:c.y,w:10,h:14})){
+        c.collected=true;sm_coins++;sm_score+=100;
+        sm_coinAnims.push({x:c.x,y:c.y,vy:-3.5,life:35,maxLife:35});
+        sm_scorePopups.push({x:c.x,y:c.y-8,val:'+100',life:50});
+      }
+    });
+    if(!sm_flagReached&&sm_rectsOverlap(sm_mario,{x:SM_FLAG_X-10,y:SM_FLAG_Y,w:28,h:SM_FLAG_H})){
+      sm_flagReached=true;sm_score+=2000;setTimeout(()=>{sm_won=true;sm_triggerWin();},1000);
+    }
+  }
+
+  // ── UPDATE ENEMIES ──
+  function sm_updateEnemies(){
+    sm_enemies.forEach(e=>{
+      if(!e.alive) return;
+      e.x+=e.vx;e.vy=(e.vy||0)+GRAVITY;if(e.vy>12) e.vy=12;e.y+=e.vy;
+      for(const s of sm_solids){
+        const eb={x:e.x,y:e.y,w:16,h:16};
+        if(sm_rectsOverlap(eb,s)){
+          const oy=Math.min(e.y+16-s.y,s.y+s.h-e.y),ox=Math.min(e.x+16-s.x,s.x+s.w-e.x);
+          if(oy<=ox){if(e.y+8<s.y+s.h/2){e.y=s.y-16;e.vy=0;}}else{e.vx*=-1;}
+        }
+      }
+      if(e.x<0) e.vx=Math.abs(e.vx);if(e.x>WORLD_W) e.vx=-Math.abs(e.vx);
+      if(e.y>H+50) e.alive=false;
+      if(!sm_mario.dying&&sm_mario.invincible===0){
+        if(sm_rectsOverlap(sm_mario,{x:e.x,y:e.y,w:16,h:16})){
+          const mBottom=sm_mario.y+sm_mario.h;
+          if(sm_mario.vy>0&&mBottom<e.y+10){
+            e.alive=false;sm_score+=e.type==='koopa'?200:100;
+            sm_scorePopups.push({x:e.x,y:e.y-8,val:e.type==='koopa'?'+200':'+100',life:60});
+            sm_spawnParticles(e.x+8,e.y+8,8,e.type==='koopa'?PAL.kShell:PAL.gBrown);
+            sm_mario.vy=-5.5;
+          } else {sm_mario.dying=true;sm_mario.vy=-6;}
+        }
+      }
+    });
+  }
+
+  // ── PARTICLES ──
+  function sm_spawnParticles(x,y,n,color){
+    for(let i=0;i<n;i++){
+      const angle=(Math.PI*2/n)*i+Math.random()*0.5,spd=2+Math.random()*3;
+      sm_particles.push({x,y,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-2,life:20+Math.random()*20,maxLife:40,color,size:2+Math.random()*3});
+    }
+  }
+  function sm_updateParticles(){
+    sm_particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.25;p.life--;});
+    sm_particles=sm_particles.filter(p=>p.life>0);
+    sm_coinAnims.forEach(a=>{a.y+=a.vy;a.vy+=0.3;a.life--;});
+    sm_coinAnims=sm_coinAnims.filter(a=>a.life>0);
+    sm_scorePopups.forEach(p=>{p.y-=0.5;p.life--;});
+    sm_scorePopups=sm_scorePopups.filter(p=>p.life>0);
+  }
+
+  // ── DRAWING ──
+  function sm_drawBackground(){
+    // Sky gradient layers
+    const grad=ctx.createLinearGradient(0,0,0,H*0.7);
+    grad.addColorStop(0,PAL.sky1);grad.addColorStop(0.5,PAL.sky2);grad.addColorStop(1,PAL.sky3);
+    px(0,0,W,H*0.7,PAL.sky1);ctx.fillStyle=grad;ctx.fillRect(0,0,W,H*0.7);
+    // Stars
+    ctx.fillStyle='rgba(255,255,220,0.6)';
+    const starPositions=[[50,20],[150,40],[300,15],[450,35],[600,10],[720,30],[100,60],[350,55],[500,25],[680,50]];
+    starPositions.forEach(([sx,sy])=>{const ox=((sx-sm_cam*0.1)%W+W)%W;ctx.fillRect(ox,sy,2,2);});
+    // Moon
+    const moonX=((700-sm_cam*0.05)%W+W)%W;
+    ctx.fillStyle='#c9a84c';ctx.beginPath();ctx.arc(moonX,45,18,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=PAL.sky2;ctx.beginPath();ctx.arc(moonX+6,40,14,0,Math.PI*2);ctx.fill();
+    // Background trees
+    for(let tx=0;tx<WORLD_W;tx+=120){
+      const sx=tx-sm_cam*0.3;if(sx<-80||sx>W+80) continue;
+      const h=60+((tx*7)%40);
+      px(sx+18,H*0.7-h,8,h,PAL.trunkDark);
+      ctx.fillStyle=PAL.leaf4;ctx.beginPath();ctx.arc(sx+22,H*0.7-h-18,22,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=PAL.leaf2;ctx.beginPath();ctx.arc(sx+22,H*0.7-h-22,16,0,Math.PI*2);ctx.fill();
+    }
+    // Midground elements
+    for(let tx=60;tx<WORLD_W;tx+=200){
+      const sx=tx-sm_cam*0.6;if(sx<-60||sx>W+60) continue;
+      px(sx+12,H*0.68-50,6,50,PAL.trunk);
+      ctx.fillStyle=PAL.leaf2;ctx.beginPath();ctx.arc(sx+15,H*0.68-55,18,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=PAL.leaf3;ctx.beginPath();ctx.arc(sx+15,H*0.68-60,12,0,Math.PI*2);ctx.fill();
+    }
+  }
+
+  function sm_drawGround(){
+    for(let x=0;x<WORLD_W;x+=TS){
+      const inPit=(x>=1024&&x<1104)||(x>=1800&&x<1880)||(x>=2500&&x<2564);
+      if(inPit) continue;
+      const sx=x-sm_cam;if(sx<-TS||sx>W+TS) continue;
+      px(sx,H-32,TS,4,PAL.groundTop);
+      px(sx,H-28,TS,8,PAL.groundMid);
+      px(sx,H-20,TS,12,PAL.groundBot);
+      px(sx,H-8,TS,8,PAL.groundDark);
+      if(x%(TS*3)===0){px(sx+2,H-26,4,2,PAL.cGold+'33');}
+    }
+  }
+
+  function sm_drawBrickBlock(sx,sy){
+    px(sx,sy,TS,TS,PAL.bRed);
+    px(sx,sy,TS,2,PAL.bMortar);px(sx,sy,2,TS,PAL.bMortar);
+    px(sx+TS/2,sy+4,2,TS-4,PAL.bMortar);
+    px(sx+2,sy+TS/2,TS/2-2,2,PAL.bMortar);
+    px(sx+TS/2+2,sy+TS/2+4,TS/2-2,2,PAL.bMortar);
+    px(sx,sy,TS,1,PAL.bMortar);px(sx,sy+TS-1,TS,1,PAL.bDark);
+  }
+
+  function sm_drawQBlock(sx,sy,hit){
+    if(hit){px(sx,sy,TS,TS,PAL.stone2);px(sx+2,sy+2,TS-4,TS-4,PAL.stone1);return;}
+    const t=Date.now()/200;
+    const c1=Math.sin(t)>0?PAL.qOrange:PAL.qYellow;
+    px(sx,sy,TS,TS,c1);px(sx+1,sy+1,TS-2,TS-2,PAL.qYellow);
+    ctx.fillStyle='#fff';ctx.font='bold 11px Courier New';ctx.fillText('?',sx+4,sy+12);
+    px(sx,sy,TS,1,'rgba(255,255,255,0.4)');px(sx,sy+TS-1,TS,1,PAL.qDark);
+  }
+
+  function sm_drawPipe(sx,py,pw,ph){
+    px(sx,py,pw,ph,PAL.moss2);px(sx+2,py+2,pw-4,ph-2,PAL.vine);
+    px(sx-2,py-4,pw+4,10,'#2a6a2a');px(sx,py-4,pw,10,PAL.moss1);
+    px(sx+pw-4,py,4,ph,'#1a4a1a');
+  }
+
+  function sm_drawFlag(){
+    const sx=SM_FLAG_X-sm_cam;if(sx<-20||sx>W+20) return;
+    px(sx,SM_FLAG_Y,4,SM_FLAG_H,PAL.poleGrey);px(sx+2,SM_FLAG_Y,2,SM_FLAG_H,PAL.stoneLight);
+    const t=Math.floor(Date.now()/200)%4;
+    px(sx+4,SM_FLAG_Y+t,28,20,PAL.flagGreen);px(sx+4,SM_FLAG_Y+t,28,4,'#00ff44');
+    ctx.fillStyle='#fff';ctx.font='bold 9px Courier New';ctx.fillText('★',sx+10,SM_FLAG_Y+14+t);
+    px(sx-16,SM_FLAG_Y+SM_FLAG_H-16,36,16,PAL.stone2);
+  }
+
+  function sm_drawAllCoins(){
+    sm_coinItems.forEach(c=>{
+      if(c.collected) return;
+      const sx=c.x-sm_cam;if(sx<-10||sx>W+10) return;
+      const t=Math.floor(Date.now()/150)%4;
+      const offsets=[0,2,2,0];const ww=[10,8,6,8];
+      px(sx+offsets[t],c.y,ww[t],14,PAL.cGold);
+      px(sx+offsets[t]+1,c.y+2,ww[t]-2,10,PAL.cGoldDark);
+    });
+    sm_coinAnims.forEach(a=>{
+      const sx=a.x-sm_cam;const alpha=a.life/a.maxLife;
+      ctx.globalAlpha=alpha;px(sx,a.y,10,14,PAL.cGold);ctx.globalAlpha=1;
+    });
+  }
+
+  function sm_drawTempleSteps(){
+    SM_TEMPLE_STEPS.forEach(s=>{
+      const sx=s.x-sm_cam;if(sx<-s.w||sx>W+s.w) return;
+      px(sx,s.y,s.w,s.h,PAL.stone1);px(sx,s.y,s.w,4,PAL.stoneLight);px(sx,s.y+s.h-4,s.w,4,PAL.stoneDark);
+      px(sx+4,s.y+6,s.w-8,s.h-10,PAL.stone2);
+      if(s.w>12){px(sx+s.w/2-2,s.y+8,4,s.h-12,PAL.stoneDark+'88');}
+    });
+  }
+
+  function sm_drawMario(){
+    const m=sm_mario;const sx=m.x-sm_cam;
+    if(m.dying){
+      ctx.globalAlpha=Math.sin(m.deadTimer*0.3)>0?1:0.5;
+    } else if(m.invincible>0) ctx.globalAlpha=Math.sin(m.invincible*0.5)>0?1:0.4;
+    const flip=m.dir===-1;
+    ctx.save();if(flip){ctx.translate(sx+m.w,m.y);ctx.scale(-1,1);}else{ctx.translate(sx,m.y);}
+    const wf=m.onGround?m.walkFrame:2;
+    // Hat
+    px(2,0,10,4,PAL.mHat);px(0,4,14,3,PAL.mHat);
+    // Face
+    px(2,7,10,6,PAL.mSkin);
+    // Eyes
+    px(5,8,2,2,'#fff');px(10,8,2,2,'#fff');px(6,8,1,1,'#000');px(11,8,1,1,'#000');
+    // Mustache
+    px(3,11,3,2,'#5c3010');px(8,11,4,2,'#5c3010');
+    // Body
+    px(1,13,12,8,PAL.mRed);px(3,13,8,4,PAL.mBelt);
+    // Overalls
+    px(0,17,14,6,PAL.mBlue);
+    // Arms
+    px(-2,13,4,5,PAL.mSkin);px(12,13,4,5,PAL.mSkin);
+    // Shoes
+    if(wf===0){px(1,23,5,4,PAL.mShoe);px(8,23,5,4,PAL.mShoe);}
+    else{px(0,23,5,4,PAL.mShoe);px(9,23,5,4,PAL.mShoe);}
+    ctx.restore();
+    ctx.globalAlpha=1;
+  }
+
+  function sm_drawGoomba(sx,sy){
+    px(sx,sy+4,16,12,PAL.gBrown);px(sx+1,sy,14,12,PAL.gBrown);
+    px(sx+3,sy+2,10,8,PAL.gFoot+'cc');
+    px(sx+3,sy+4,3,3,PAL.gEye);px(sx+10,sy+4,3,3,PAL.gEye);
+    px(sx+4,sy+4,2,2,'#000');px(sx+11,sy+4,2,2,'#000');
+    px(sx+5,sy+9,6,2,'#330000');
+    px(sx,sy+14,6,4,PAL.gFoot);px(sx+10,sy+14,6,4,PAL.gFoot);
+  }
+
+  function sm_drawKoopa(sx,sy){
+    px(sx+2,sy,12,16,PAL.kShell);px(sx+4,sy+2,8,12,PAL.leaf4);
+    const cr=[[4,2,8,4],[2,6,12,8]];cr.forEach(([x,y,w,h])=>{px(sx+x,sy+y,w,h,'rgba(255,255,255,0.15)');});
+    px(sx+3,sy-4,10,6,PAL.kSkin);
+    px(sx+5,sy-2,2,2,'#fff');px(sx+10,sy-2,2,2,'#fff');
+    px(sx+6,sy-2,1,1,'#000');px(sx+11,sy-2,1,1,'#000');
+    px(sx+2,sy+18,5,4,PAL.mSkin);px(sx+9,sy+18,5,4,PAL.mSkin);
+  }
+
+  function sm_drawEnemies(){
+    sm_enemies.forEach(e=>{
+      if(!e.alive) return;
+      const sx=e.x-sm_cam;if(sx<-24||sx>W+24) return;
+      if(e.type==='goomba') sm_drawGoomba(sx,e.y); else sm_drawKoopa(sx,e.y-2);
+    });
+  }
+
+  function sm_drawParticles(){
+    sm_particles.forEach(p=>{
+      const sx=p.x-sm_cam,alpha=p.life/p.maxLife;
+      ctx.globalAlpha=alpha;ctx.fillStyle=p.color;ctx.fillRect(sx-p.size/2,p.y-p.size/2,p.size,p.size);
+    });
+    ctx.globalAlpha=1;
+    sm_scorePopups.forEach(p=>{
+      const sx=p.x-sm_cam;ctx.globalAlpha=p.life/60;ctx.fillStyle='#ffff44';
+      ctx.font='bold 10px Courier New';ctx.fillText(p.val,sx,p.y);
+    });
+    ctx.globalAlpha=1;
+  }
+
+  function sm_drawGameOver(){
+    px(0,0,W,H,'rgba(4,14,9,0.75)');
+    drawPixelText('GAME OVER',W/2-80,H/2-10,28,'#ff6666','#330000');
+    drawPixelText('Press R to Restart',W/2-95,H/2+25,14,'#8fae99','#000');
+  }
+
+  function sm_draw(){
+    ctx.clearRect(0,0,W,H);
+    sm_drawBackground();sm_drawTempleSteps();sm_drawGround();
+    const brickRows=[
+      {x:256,y:H-32-80,count:5},{x:512,y:H-32-64,count:4},{x:768,y:H-32-96,count:3},
+      {x:1200,y:H-32-80,count:6},{x:1500,y:H-32-64,count:5},{x:1900,y:H-32-80,count:4},
+      {x:2100,y:H-32-96,count:5},{x:2300,y:H-32-64,count:4},{x:2600,y:H-32-80,count:6},{x:2800,y:H-32-96,count:4},
+    ];
+    brickRows.forEach(r=>{for(let i=0;i<r.count;i++){const sx=r.x+i*TS-sm_cam;if(sx<-TS||sx>W+TS) continue;sm_drawBrickBlock(sx,r.y);}});
+    SM_QBLOCKS.forEach(q=>{const sx=q.x-sm_cam;if(sx<-TS||sx>W+TS) return;sm_drawQBlock(sx,q.y,q.hit);});
+    SM_PIPES.forEach(p=>sm_drawPipe(p.x-sm_cam,p.y,p.w,p.h));
+    sm_drawFlag();sm_drawAllCoins();sm_drawEnemies();sm_drawMario();sm_drawParticles();
+    [[1024,1104],[1800,1880],[2500,2564]].forEach(([px1,px2])=>{
+      const sx=px1-sm_cam,ex=px2-sm_cam;if(ex<0||sx>W) return;
+      const grd=ctx.createLinearGradient(sx,H-40,sx,H);
+      grd.addColorStop(0,'rgba(201,168,76,0)');grd.addColorStop(1,'rgba(201,100,0,0.4)');
+      ctx.fillStyle=grd;ctx.fillRect(Math.max(0,sx),H-40,Math.min(ex,W)-Math.max(0,sx),40);
+    });
+    if(sm_gameOver&&!sm_won) sm_drawGameOver();
+  }
+
+  // ── HUD UPDATE ──
+  function sm_updateHUD(){
+    document.getElementById('sm-h-score').textContent=String(sm_score).padStart(6,'0');
+    document.getElementById('sm-h-coins').textContent='✦ '+String(sm_coins).padStart(2,'0');
+    document.getElementById('sm-h-lives').textContent='♥ '.repeat(Math.max(0,sm_lives)).trim()||'✕';
+    document.getElementById('sm-h-time').textContent=Math.max(0,sm_gameTime);
+  }
+
+  // ── WIN / CONFETTI ──
+  let sm_confettiParts=[],sm_confettiOn=false,sm_confettiRaf;
+  function sm_startConfetti(){
+    sm_confettiOn=true;
+    const cols=['#e52222','#C9A84C','#1a5c36','#2244cc','#ff69b4','#ff8c00','#00ffcc'];
+    for(let i=0;i<200;i++){
+      sm_confettiParts.push({
+        x:Math.random()*cc.width,y:-30-Math.random()*200,vx:(Math.random()-0.5)*5,vy:2+Math.random()*4,
+        color:cols[Math.floor(Math.random()*cols.length)],w:6+Math.random()*10,h:4+Math.random()*6,
+        rot:Math.random()*360,rv:(Math.random()-0.5)*10,shape:Math.random()>0.5?'rect':'circle'
+      });
+    }
+    sm_animateConfetti();
+  }
+  function sm_animateConfetti(){
+    cctx.clearRect(0,0,cc.width,cc.height);
+    sm_confettiParts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.rot+=p.rv;cctx.save();cctx.translate(p.x,p.y);cctx.rotate(p.rot*Math.PI/180);
+      cctx.fillStyle=p.color;
+      if(p.shape==='circle'){cctx.beginPath();cctx.arc(0,0,p.w/2,0,Math.PI*2);cctx.fill();}
+      else cctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      cctx.restore();
+    });
+    sm_confettiParts=sm_confettiParts.filter(p=>p.y<cc.height+30);
+    if(sm_confettiParts.length<40&&sm_confettiOn){
+      const cols=['#C9A84C','#1a5c36','#e52222','#2244cc','#ff69b4'];
+      for(let i=0;i<40;i++) sm_confettiParts.push({x:Math.random()*cc.width,y:-20,vx:(Math.random()-0.5)*5,vy:2+Math.random()*4,color:cols[Math.floor(Math.random()*cols.length)],w:6+Math.random()*10,h:4+Math.random()*6,rot:Math.random()*360,rv:(Math.random()-0.5)*10,shape:Math.random()>0.5?'rect':'circle'});
+    }
+    if(sm_confettiOn) sm_confettiRaf=requestAnimationFrame(sm_animateConfetti);
+  }
+  function sm_stopConfetti(){sm_confettiOn=false;cancelAnimationFrame(sm_confettiRaf);cctx.clearRect(0,0,cc.width,cc.height);sm_confettiParts=[];}
+
+  function sm_triggerWin(){
+    clearInterval(sm_timerInterval);
+    document.getElementById('sm-ws-score').textContent=String(sm_score).padStart(6,'0');
+    document.getElementById('sm-ws-coins').textContent=sm_coins;
+    document.getElementById('sm-ws-time').textContent=Math.max(0,sm_gameTime);
+    document.getElementById('sm-win-screen').classList.add('show');
+    sm_startConfetti();
+  }
+
+  function sm_resetGame(){
+    sm_score=0;sm_coins=0;sm_lives=3;sm_gameTime=300;
+    sm_gameOver=false;sm_won=false;sm_flagReached=false;
+    SM_QBLOCKS.forEach(q=>q.hit=false);
+    sm_solids=sm_makeSolids();sm_enemies=sm_makeEnemies();
+    sm_coinItems=JSON.parse(JSON.stringify(SM_COIN_ITEMS_BASE));
+    sm_coinAnims=[];sm_scorePopups=[];sm_particles=[];
+    sm_resetMario();
+    document.getElementById('sm-win-screen').classList.remove('show');
+    sm_stopConfetti();clearInterval(sm_timerInterval);sm_startTimer();
+  }
+
+  function sm_startTimer(){
+    sm_timerInterval=setInterval(()=>{
+      if(!sm_gameOver&&!sm_won){sm_gameTime=Math.max(0,sm_gameTime-1);if(sm_gameTime===0){sm_mario.dying=true;sm_mario.vy=-6;}}
+    },1000);
+  }
+
+  // ── INPUT (scoped to canvas focus) ──
+  document.addEventListener('keydown',e=>{
+    // Only handle if canvas section is in viewport
+    const rect=canvas.getBoundingClientRect();
+    const inView=rect.top<window.innerHeight&&rect.bottom>0;
+    if(!inView) return;
+    sm_keys[e.code]=true;
+    if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)&&inView) e.preventDefault();
+    if(e.code==='KeyR') sm_resetGame();
+  });
+  document.addEventListener('keyup',e=>{sm_keys[e.code]=false;});
+
+  // Touch
+  document.getElementById('sm-btn-left').addEventListener('touchstart',e=>{sm_keys['sm_left']=true;e.preventDefault();},{passive:false});
+  document.getElementById('sm-btn-left').addEventListener('touchend',e=>{sm_keys['sm_left']=false;e.preventDefault();},{passive:false});
+  document.getElementById('sm-btn-right').addEventListener('touchstart',e=>{sm_keys['sm_right']=true;e.preventDefault();},{passive:false});
+  document.getElementById('sm-btn-right').addEventListener('touchend',e=>{sm_keys['sm_right']=false;e.preventDefault();},{passive:false});
+  document.getElementById('sm-btn-jump').addEventListener('touchstart',e=>{sm_keys['sm_jump']=true;e.preventDefault();},{passive:false});
+  document.getElementById('sm-btn-jump').addEventListener('touchend',e=>{sm_keys['sm_jump']=false;e.preventDefault();},{passive:false});
+
+  document.getElementById('sm-play-again').onclick=sm_resetGame;
+
+  // ── GAME LOOP ──
+  function sm_loop(){
+    sm_frameCount++;
+    if(!sm_won&&!sm_gameOver){sm_updateMario();sm_updateEnemies();sm_updateParticles();sm_updateHUD();}
+    sm_draw();
+    requestAnimationFrame(sm_loop);
+  }
+
+  sm_startTimer();
+  sm_loop();
+
+  })(); // end IIFE
+  </script>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══════ PRACTICE MODE ═══════ -->
+  <section id="practice">
+    <h2 class="s-title">Practice <em>Mode</em></h2>
+    <p class="s-sub">Latih suara, hafal lirik, dan rekam penampilanmu — semua tanpa meninggalkan halaman.</p>
+
+    <!-- TABS -->
+    <div class="practice-tabs">
+      <button class="practice-tab active" onclick="switchPracticeTab('mic', this)">🎙 Mic Visualizer</button>
+      <button class="practice-tab" onclick="switchPracticeTab('lyric', this)">Lirik</button>
+      <button class="practice-tab" onclick="switchPracticeTab('recorder', this)">Record & Listen</button>
+    </div>
+
+    <!-- ── PANEL 1: MIC VISUALIZER ── -->
+    <div id="mic-panel" class="practice-panel active">
+      <div id="mic-viz-wrap">
+        <canvas id="mic-canvas"></canvas>
+        <div id="mic-idle-msg">
+          <span class="mic-icon">🎙</span>
+          <span class="mic-label">Tekan tombol untuk aktifkan mikrofon</span>
+        </div>
+      </div>
+
+      <div id="mic-db-bar">
+        <span id="mic-db-label">Level</span>
+        <div id="mic-db-track"><div id="mic-db-fill"></div></div>
+        <span id="mic-db-val">— dB</span>
+      </div>
+
+      <div class="mic-controls">
+        <button id="mic-toggle-btn" onclick="toggleMic()">
+          <span class="btn-dot"></span>
+          <span id="mic-btn-text">Aktifkan Mikrofon</span>
+        </button>
+        <span id="mic-status">Mikrofon tidak aktif</span>
+      </div>
+    </div>
+
+    <!-- ── PANEL 2: LYRIC DISPLAY ── -->
+    <div id="lyric-panel" class="practice-panel">
+      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1rem; letter-spacing:0.06em;">Pilih lagu dari Mini Game untuk tampilkan lirik contoh:</p>
+      <div id="lyric-song-selector"></div>
+
+      <div id="lyric-player-row">
+        <button id="lyric-play-btn" onclick="toggleLyricPlay()">▶</button>
+        <div>
+          <div id="lyric-song-name">—</div>
+          <div id="lyric-song-artist-name">Pilih lagu terlebih dahulu</div>
+          <div id="lyric-progress-bar"><div id="lyric-progress-fill"></div></div>
+        </div>
+      </div>
+
+      <div id="lyric-display-box">
+        <div id="lyric-time-hint">00:00</div>
+        <div id="lyric-current" style="display:none;"></div>
+        <div id="lyric-next" style="display:none;"></div>
+        <div id="lyric-placeholder">← Pilih lagu dan tekan play</div>
+      </div>
+    </div>
+
+    <!-- ── PANEL 3: RECORDER ── -->
+    <div id="recorder-panel" class="practice-panel">
+      <div id="rec-viz-wrap">
+        <canvas id="rec-canvas"></canvas>
+      </div>
+
+      <div id="rec-controls">
+        <button id="rec-btn" onclick="toggleRecording()">
+          <span class="rec-dot"></span>
+          <span id="rec-btn-text">Mulai Rekam</span>
+        </button>
+        <span id="rec-timer">0:00 / 0:30</span>
+        <span id="rec-status">Siap merekam — maks. 30 detik</span>
+      </div>
+
+      <div id="recordings-list">
+        <div id="recordings-empty">Belum ada rekaman.<br>Tekan "Mulai Rekam" untuk mencatat suaramu.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══════ SOUL JOURNAL ═══════ -->
+  <section id="journal">
+    <h2 class="s-title">Soul <em>Journal</em></h2>
+    <p class="s-sub">Tuangkan perasaanmu — tersimpan aman, hanya milikmu.</p>
+
+    <!-- Locked State (belum login) -->
+    <div id="journal-locked">
+      <div id="journal-lock-icon">♩</div>
+      <p id="journal-lock-title">Jurnalmu menunggumu</p>
+      <p id="journal-lock-sub">Login atau buat akun untuk mulai menulis diary musikmu.</p>
+      <button id="journal-login-btn" onclick="openAuthModal()">Masuk / Daftar</button>
+    </div>
+
+    <!-- Unlocked State (sudah login) -->
+    <div id="journal-unlocked" style="display:none;">
+
+      <!-- Header user -->
+      <div id="journal-user-bar">
+        <div id="journal-user-info">
+          <span id="journal-avatar">♪</span>
+          <div>
+            <div id="journal-username-display">—</div>
+            <div id="journal-user-sub">Soul Journal aktif</div>
+          </div>
+        </div>
+        <button id="journal-logout-btn" onclick="handleLogout()">Keluar</button>
+      </div>
+
+      <!-- Composer -->
+      <div id="journal-composer">
+        <div id="journal-composer-header">
+          <span id="journal-date-display"></span>
+          <div id="journal-mood-chips">
+            <span class="mood-chip" data-mood="happy"   onclick="selectJournalMood(this)">😊 Senang</span>
+            <span class="mood-chip" data-mood="sad"     onclick="selectJournalMood(this)">😢 Sedih</span>
+            <span class="mood-chip" data-mood="excited" onclick="selectJournalMood(this)">⚡ Excited</span>
+            <span class="mood-chip" data-mood="calm"    onclick="selectJournalMood(this)">🌿 Tenang</span>
+            <span class="mood-chip" data-mood="angry"   onclick="selectJournalMood(this)">🔥 Marah</span>
+          </div>
+        </div>
+        <textarea
+          id="journal-input"
+          placeholder="Hari ini aku merasa... (tulis apapun yang ada di hatimu)"
+          maxlength="2000"
+        ></textarea>
+        <div id="journal-composer-footer">
+          <span id="journal-char-count">0 / 2000</span>
+          <button id="journal-save-btn" onclick="saveJournal()">
+            <span id="journal-save-text">Simpan</span>
+            <span id="journal-save-spinner" style="display:none;">⟳</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Entries list -->
+      <div id="journal-entries-wrap">
+        <h3 id="journal-entries-title">Entri Sebelumnya</h3>
+        <div id="journal-entries-list">
+          <div id="journal-entries-empty">
+            <span>♩</span>
+            <p>Belum ada entri. Mulai tulis jurnalmu!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══════ PROGRAMER ═══════ -->
+  <section id="programer">
+    <h2 class="s-title">The <em>Squad</em></h2>
+    <p class="s-sub">Otak-otak brilian di balik Sonic-Flow.</p>
+    <div id="squad-grid">
+      <!--
+        DEVELOPER NOTE:
+        Ganti emoji placeholder dengan tag <img> kalau sudah punya foto anggota.
+        Contoh: <img src="foto/nama.jpg" style="width:100%;height:100%;object-fit:cover;" />
+        Data squad bisa diubah di array `squadData` di bagian script bawah.
+      -->
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ═══════ INFO ═══════ -->
+  <section id="info">
+    <div id="info-grid">
+      <div class="info-col">
+        <h3>Tentang Sonic-Flow</h3>
+        <p>Sonic-Flow adalah platform pengalaman musik yang dirancang untuk menghubungkan emosi kamu dengan soundtrack yang tepat. Dibangun dengan penuh semangat, ditenagai oleh kode yang bersih.</p>
+        <p style="margin-top:1rem; font-size:0.78rem; opacity:0.5;">© 2025 Sonic-Flow Team. All rights reserved.</p>
+      </div>
+      <div class="info-col">
+        <h3>Navigasi</h3>
+        <a href="#home">Home</a>
+        <a href="#musik">Music Moods</a>
+        <a href="#minigame">Mini Game</a>
+        <a href="#programer">Our Squad</a>
+        <a href="#info">Info</a>
+      </div>
+      <div class="info-col">
+        <h3>Tech Stack</h3>
+        <p>Next.js · React</p>
+        <p>Tailwind CSS · GSAP</p>
+        <p>Spotify Embed API</p>
+        <p>Vercel Hosting</p>
+      </div>
+    </div>
+    <div id="footer-bottom">
+      <div id="footer-logo">Sonic-Flow</div>
+      <div>Made with ♪ and lots of green coffee</div>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
