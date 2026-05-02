@@ -1,4 +1,4 @@
-    /* ════════════════════════════════
+/* ════════════════════════════════
        SUPABASE CONFIG
        ── Ganti nilai di bawah dengan Project URL & Anon Key dari dashboard Supabase kamu
        ── https://supabase.com → Settings → API
@@ -147,22 +147,19 @@
     }
 
     async function handleLogin(email, password) {
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      const { error } = await sb.auth.signInWithPassword({ email, password });
       if (error) {
         showAuthError('Username atau password salah.');
         return;
       }
-      currentUser = data.user;
-      await loadUserProfile();
-      onUserLoggedIn();
+      // ✅ Jangan panggil loadUserProfile() / onUserLoggedIn() di sini.
+      // onAuthStateChange akan menangkap event SIGNED_IN dan melakukan semuanya.
       closeAuthModal();
     }
 
     async function handleLogout() {
       await sb.auth.signOut();
-      currentUser     = null;
-      currentUsername = null;
-      onUserLoggedOut();
+      // ✅ Reset state dilakukan oleh onAuthStateChange event SIGNED_OUT.
     }
 
     async function loadUserProfile() {
@@ -203,20 +200,30 @@
         '<div id="journal-entries-empty"><span>♩</span><p>Belum ada entri. Mulai tulis jurnalmu!</p></div>';
     }
 
-    /* ─── Restore session on page load ─── */
-    sb.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        currentUser = session.user;
-        await loadUserProfile();
-        onUserLoggedIn();
-      }
-    });
-
-    /* ─── Listen to auth state changes ─── */
+    /* ════════════════════════════════════════════════════════════
+       AUTH STATE — satu-satunya sumber kebenaran untuk sesi user.
+       ✅ Menangani: restore sesi saat refresh (INITIAL_SESSION),
+                     login baru (SIGNED_IN), dan logout (SIGNED_OUT).
+       ✅ loadUserProfile() + onUserLoggedIn() hanya dipanggil di sini.
+       ✅ Tidak ada getSession() manual → tidak ada race condition.
+    ════════════════════════════════════════════════════════════ */
     sb.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        currentUser = session.user;
-        if (!currentUsername) {
+      if (event === 'INITIAL_SESSION') {
+        // Dipanggil sekali saat halaman pertama dimuat.
+        // session = null berarti tidak ada sesi aktif (tampilkan state logout).
+        if (session?.user) {
+          currentUser = session.user;
+          await loadUserProfile();
+          onUserLoggedIn();
+        } else {
+          onUserLoggedOut();
+        }
+      } else if (event === 'SIGNED_IN') {
+        // Hanya jalankan jika ini benar-benar user baru / berbeda
+        // (mencegah SIGNED_IN ganda yang kadang Supabase kirim).
+        if (session?.user && session.user.id !== currentUser?.id) {
+          currentUser = session.user;
+          currentUsername = null; // reset agar loadUserProfile berjalan segar
           await loadUserProfile();
           onUserLoggedIn();
         }
