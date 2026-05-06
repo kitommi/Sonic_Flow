@@ -456,9 +456,7 @@
     navOverlay.addEventListener('click', closeDrawer);
     window.addEventListener('resize', () => { if (window.innerWidth > 860) closeDrawer(); });
 
-    /* ════════════════════════════════
-       RAIN CANVAS
-    ════════════════════════════════ */
+
     const canvas = document.getElementById('rain-canvas');
     const ctx = canvas.getContext('2d');
     let drops = [];
@@ -954,7 +952,7 @@
       { name: "M. Renno Agustovano", role: "Lead Developer",    motto: "Code is poetry in motion",       img: "picture/reno.jpeg", emoji: "🎵" },
       { name: "Marisa Al Zahra", role: "Programmer",    motto: "Batu besar yang menghalangi jalanmu bisa jadi batu pijakan kalau kamu mau melihatnya dari sudut berbeda", img: "picture/marisa.jpeg", emoji: "🎸" },
       { name: "Damara Keisya R.", role: "Programmer",  motto: "Focus on your goal, dont look in any direction but ahead",       img: "picture/damara.jpeg", emoji: "🎹" },
-      { name: "Ajeng Candra Lokasari", role: "Programmer",      motto: "Kegagalan adalah bumbu yang memberi rasa pada kesuksesan",     img: "picture/ajeng.jpeg", emoji: "🎷" },
+      { name: "Ajeng Candra Lokasari", role: "Programmer",      motto: "Never stop learning, because life never stop teaching.",     img: "picture/ajeng.jpeg", emoji: "🎷" },
       { name: "Hendro Nur Saputra", role: "Programmer",    motto: "Hendro tanpa kata-kata bagaikan Singa tanpa mahkota",      img: "picture/hendro.jpeg", emoji: "🥁" },
       { name: "Anindya Livya Azzahra", role: "Programmer",     motto: "Niatnya berubah, actionya masih buffering realita",        img: "picture/livy.jpeg", emoji: "🎺" },
       { name: "Aydin Akmal Daffa", role: "Programmer",   motto: "Jangan biarkan hari buruk membuatmu merasa punya kehidupan yang buruk.",            img: "picture/aydin.jpeg", emoji: "🎻" },
