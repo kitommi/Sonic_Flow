@@ -852,6 +852,12 @@
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--border);
       cursor: none;
+      transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    .squad-card:hover {
+      border-color: rgba(201,168,76,0.35);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 0 0 1px rgba(201,168,76,0.12);
+      transform: translateY(-4px);
     }
     .squad-ph {
       width: 100%;
@@ -861,8 +867,8 @@
       align-items: center;
       justify-content: center;
       font-size: 3.5rem;
-      transition: filter 0.4s, opacity 0.4s;
-      background: linear-gradient(140deg, rgba(10,61,39,0.8), rgba(6,44,29,1));
+      transition: filter 0.45s ease, transform 0.45s ease;
+      background: linear-gradient(140deg, rgba(12,12,18,0.85), rgba(8,8,14,1));
       overflow: hidden;
     }
     .squad-ph img {
@@ -871,20 +877,25 @@
       object-fit: cover;
       object-position: center top;
       display: block;
+      transition: transform 0.45s ease;
     }
+    .squad-card:hover .squad-ph img { transform: scale(1.04); }
     .squad-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(6,44,29,0.97) 55%, rgba(6,44,29,0.5) 100%);
+      background: linear-gradient(to top,
+        rgba(4,4,10,0.96) 40%,
+        rgba(4,4,10,0.55) 70%,
+        rgba(4,4,10,0.08) 100%);
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       padding: 1.3rem;
       opacity: 0;
-      transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1);
+      transition: opacity 0.38s cubic-bezier(0.4,0,0.2,1);
     }
     .squad-card:hover .squad-overlay { opacity: 1; }
-    .squad-card:hover .squad-ph { filter: blur(3px) saturate(0.2); opacity: 0.4; }
+    .squad-card:hover .squad-ph { filter: blur(2px) brightness(0.7); }
     .sq-name {
       font-family: 'Playfair Display', serif;
       font-size: 1rem;
@@ -2162,34 +2173,41 @@
 }
 
 /* ═══════════════════════════════════════════════════════
-   LIGHT MODE  — senada, tidak tabrak warna
-   Warna dasar: krem/putih hangat
-   Aksen: gold tetap, hijau hanya untuk teks/accent tipis
+   LIGHT MODE — Sage & Champagne Gold
+   Nyambung dengan dark mode (forest green base)
+   Gold tetap sama, sage jadi identitas, putih bersih
 ═══════════════════════════════════════════════════════ */
 html.light-mode {
-  --bg:        #f8f5f0;
-  --bg2:       #f0ece3;
-  --bg3:       #e8e3d8;
-  --cream:     #1c1c28;
-  --gold:      #b8872a;
-  --gold-lt:   #d4a040;
-  --muted:     #7a7060;
-  --green-mid: #2d6a46;
-  --border:    rgba(184,135,42,0.22);
+  --bg:         #F5F7F2;
+  --bg2:        #EDF0E9;
+  --bg3:        #E2E8DC;
+  --cream:      #1E2D28;
+  --gold:       #C9A227;
+  --gold-lt:    #DDB94A;
+  --muted:      #5A6F68;
+  --sage:       #7A9E8E;
+  --sage-lt:    #A3B8AE;
+  --green-mid:  #D8E4D2;
+  --border:     rgba(201,162,39,0.22);
+  --glass-bg:   rgba(255,255,255,0.72);
+  --accent-sage: rgba(122,158,142,0.18);
 }
 
-/* Body & background */
+/* Body */
 html.light-mode body {
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 75% 55% at 5% 0%,   rgba(201,162,39,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 45% at 95% 100%, rgba(122,158,142,0.12) 0%, transparent 50%),
+    linear-gradient(160deg, #EEF1E8 0%, #E8EDE2 40%, #DFE6D8 100%);
   color: var(--cream);
 }
 
-/* Loading screen warna sesuai tema */
+/* Loading screen */
 html.light-mode #sf-loader {
-  background: var(--bg);
+  background: linear-gradient(160deg, #EEF1E8 0%, #DFE6D8 100%);
 }
 html.light-mode #sf-loader-bar-wrap {
-  background: rgba(0,0,0,0.1);
+  background: rgba(0,0,0,0.10);
 }
 html.light-mode .sf-logo-dev {
   color: var(--cream);
@@ -2197,119 +2215,212 @@ html.light-mode .sf-logo-dev {
 
 /* Navbar */
 html.light-mode #main-nav {
-  background: rgba(248,245,240,0.9);
-  border-bottom: 1px solid var(--border);
+  background: rgba(245,247,242,0.92);
+  border-bottom: 1px solid rgba(201,162,39,0.18);
+  backdrop-filter: blur(20px) saturate(1.5);
 }
+html.light-mode #main-nav.scrolled {
+  background: rgba(243,246,240,0.97) !important;
+  backdrop-filter: blur(24px) saturate(1.7) !important;
+  border-bottom-color: rgba(201,162,39,0.28) !important;
+  box-shadow: 0 4px 24px rgba(30,45,40,0.08) !important;
+}
+html.light-mode #main-nav #nav-logo {
+  color: var(--gold);
+}
+html.light-mode nav ul a {
+  color: var(--cream);
+  font-weight: 500;
+}
+html.light-mode nav ul a:hover { color: var(--gold); }
+html.light-mode nav ul a.nav-active { color: var(--gold) !important; }
 html.light-mode #theme-toggle-btn {
-  background: rgba(0,0,0,0.06);
+  background: rgba(30,45,40,0.07);
+  color: var(--cream);
+  border: 1px solid rgba(201,162,39,0.22);
 }
 html.light-mode #theme-toggle-btn:hover {
-  background: rgba(0,0,0,0.1);
+  background: rgba(201,162,39,0.14);
+  border-color: rgba(201,162,39,0.40);
 }
 
 /* Home section */
 html.light-mode #home {
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 85% 65% at 10% 15%, rgba(201,162,39,0.14) 0%, transparent 50%),
+    radial-gradient(ellipse 55% 45% at 90% 85%, rgba(122,158,142,0.14) 0%, transparent 50%),
+    linear-gradient(148deg, #EEF1E8 0%, #E6EBE0 50%, #DCE3D5 100%);
 }
-html.light-mode #rain-canvas { opacity: 0.15; }
+html.light-mode #rain-canvas { opacity: 0.10; }
 
-/* Music moods */
-html.light-mode #musik { background: var(--bg2); }
+/* Headings & titles */
+html.light-mode .s-title,
+html.light-mode #home h1 { color: #111A17; }
+html.light-mode .s-sub,
+html.light-mode .hero-sub { color: #3A4E47; }
+html.light-mode .eyebrow { color: var(--gold); }
+
+/* Music section */
+html.light-mode #musik {
+  background:
+    radial-gradient(ellipse 70% 55% at 85% 25%, rgba(122,158,142,0.14) 0%, transparent 55%),
+    linear-gradient(165deg, #EDF0E9 0%, #E2E8DC 100%);
+}
 html.light-mode .mood-card {
-  background: rgba(255,255,255,0.6);
-  border-color: var(--border);
+  background: var(--glass-bg);
+  border: 1px solid rgba(201,162,39,0.22);
+  color: var(--cream);
+  box-shadow: 0 2px 12px rgba(30,45,40,0.07);
+  backdrop-filter: blur(10px);
 }
 html.light-mode .mood-card:hover,
 html.light-mode .mood-card.active {
   border-color: var(--gold);
-  box-shadow: 0 8px 24px rgba(184,135,42,0.12);
+  box-shadow: 0 8px 28px rgba(30,45,40,0.12), 0 0 0 1px rgba(201,162,39,0.35);
+  background: rgba(255,255,255,0.88);
 }
+html.light-mode .mood-card .mood-desc { color: var(--muted); }
 html.light-mode #spotify-ph {
   color: var(--muted);
   border-color: var(--border);
 }
 
-/* Mini Game */
-html.light-mode #minigame { background: var(--bg); }
-html.light-mode #game-player {
-  background: rgba(255,255,255,0.7);
-  border-color: var(--border);
+/* Mini Game section */
+html.light-mode #minigame {
+  background:
+    radial-gradient(ellipse 65% 50% at 15% 85%, rgba(201,162,39,0.12) 0%, transparent 55%),
+    linear-gradient(158deg, #EEF1E8 0%, #E4EAE0 100%);
 }
-html.light-mode #progress-bar { background: rgba(0,0,0,0.08); }
+html.light-mode #game-player {
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(201,162,39,0.26);
+  box-shadow: 0 4px 20px rgba(30,45,40,0.08);
+  backdrop-filter: blur(12px);
+}
+html.light-mode #progress-bar { background: rgba(30,45,40,0.10); }
 html.light-mode #game-box { color: var(--cream); }
+html.light-mode .ans-btn {
+  background: rgba(255,255,255,0.75);
+  border-color: rgba(201,162,39,0.25);
+  color: var(--cream);
+}
+html.light-mode .ans-btn:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(201,162,39,0.08);
+}
 
 /* Squad cards */
 html.light-mode .squad-card {
-  background: rgba(255,255,255,0.7);
-  border-color: var(--border);
+  background: rgba(255,255,255,0.60);
+  border: 1px solid rgba(201,162,39,0.20);
+  box-shadow: 0 2px 16px rgba(30,45,40,0.09);
+  backdrop-filter: blur(10px);
 }
+html.light-mode .squad-card:hover {
+  box-shadow: 0 12px 36px rgba(30,45,40,0.15), 0 0 0 1px rgba(201,162,39,0.35);
+  border-color: rgba(201,162,39,0.48);
+  transform: translateY(-4px);
+}
+html.light-mode .squad-overlay {
+  background: linear-gradient(to top,
+    rgba(245,247,242,0.97) 35%,
+    rgba(245,247,242,0.75) 62%,
+    rgba(245,247,242,0.10) 100%);
+}
+html.light-mode .squad-card:hover .squad-ph {
+  filter: blur(2px) brightness(0.88);
+}
+html.light-mode .sq-name { color: var(--cream); }
+html.light-mode .sq-role { color: var(--gold); }
+html.light-mode .sq-motto { color: var(--muted); }
 
 /* Memory card game */
 html.light-mode .mc-game-container {
-  background: rgba(255,255,255,0.5);
-  border-color: var(--border);
+  background: rgba(255,255,255,0.70);
+  border: 1px solid rgba(201,162,39,0.22);
+  backdrop-filter: blur(10px);
 }
 html.light-mode .mc-game-header {
-  background: rgba(0,0,0,0.04);
-  border-color: var(--border);
+  background: rgba(201,162,39,0.07);
+  border-color: rgba(201,162,39,0.18);
 }
 html.light-mode .mc-score-box,
 html.light-mode .mc-timer-box {
-  background: rgba(0,0,0,0.05);
-  border-color: var(--border);
+  background: rgba(201,162,39,0.08);
+  border-color: rgba(201,162,39,0.20);
+  color: var(--cream);
 }
 html.light-mode .mc-card-back {
-  background: linear-gradient(135deg, #c8e6d4, #e8e3d8);
-  border-color: rgba(184,135,42,0.3);
+  background: linear-gradient(135deg, #C8DDD4, #D8E8DC);
+  border-color: rgba(122,158,142,0.45);
 }
-html.light-mode .mc-card-back::after { color: var(--gold); }
+html.light-mode .mc-card-back::after { color: var(--sage); }
 html.light-mode .mc-card-front {
-  background: var(--bg2);
+  background: linear-gradient(135deg, #F5F8F2, #EBF0E6);
   border-color: var(--gold);
 }
-html.light-mode .mc-progress-dot { background: rgba(0,0,0,0.1); }
+html.light-mode .mc-progress-dot { background: rgba(30,45,40,0.12); }
 
 /* Practice section */
-html.light-mode #practice { background: var(--bg2); }
+html.light-mode #practice {
+  background:
+    radial-gradient(ellipse 55% 45% at 80% 20%, rgba(122,158,142,0.13) 0%, transparent 55%),
+    linear-gradient(158deg, #EDF0E9 0%, #E2E8DC 100%);
+}
+html.light-mode .practice-tab { color: #3A4E47; }
+html.light-mode .practice-tab.active {
+  background: rgba(201,162,39,0.12);
+  color: var(--gold);
+}
 
 /* Journal */
-html.light-mode #journal { background: var(--bg); }
+html.light-mode #journal {
+  background:
+    radial-gradient(ellipse 65% 50% at 10% 55%, rgba(201,162,39,0.10) 0%, transparent 55%),
+    linear-gradient(158deg, #EEF1E8 0%, #E4EAE0 100%);
+}
 html.light-mode #journal-composer {
-  background: rgba(255,255,255,0.7);
-  border-color: var(--border);
+  background: rgba(255,255,255,0.80);
+  border: 1px solid rgba(201,162,39,0.24);
+  box-shadow: 0 4px 18px rgba(30,45,40,0.08);
+  backdrop-filter: blur(12px);
 }
 html.light-mode #journal-input {
-  background: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.95);
   color: var(--cream);
-  border-color: var(--border);
+  border: 1px solid rgba(201,162,39,0.26);
 }
+html.light-mode #journal-input::placeholder { color: var(--sage); }
 html.light-mode .journal-entry {
-  background: rgba(255,255,255,0.65);
-  border-color: var(--border);
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(201,162,39,0.20);
+  color: var(--cream);
+  backdrop-filter: blur(8px);
 }
 html.light-mode #journal-locked {
-  background: rgba(255,255,255,0.5);
-  border-color: var(--border);
+  background: rgba(237,240,233,0.80);
+  border: 1px solid rgba(201,162,39,0.18);
 }
 
 /* Auth modal */
 html.light-mode #auth-modal-overlay {
-  background: rgba(0,0,0,0.4);
+  background: rgba(10,18,15,0.45);
 }
 html.light-mode #auth-modal {
-  background: #f8f5f0;
-  border: 1px solid var(--border);
+  background: linear-gradient(145deg, #F5F8F2, #ECF0E8);
+  border: 1px solid rgba(201,162,39,0.28);
   color: var(--cream);
+  box-shadow: 0 20px 60px rgba(30,45,40,0.20);
 }
 html.light-mode .auth-field label { color: var(--cream); }
 html.light-mode .auth-field input {
-  background: rgba(0,0,0,0.05);
-  border-color: var(--border);
+  background: rgba(255,255,255,0.88);
+  border: 1px solid rgba(201,162,39,0.26);
   color: var(--cream);
 }
-html.light-mode .auth-field input::placeholder { color: var(--muted); }
+html.light-mode .auth-field input::placeholder { color: var(--sage-lt); }
 html.light-mode #auth-tabs {
-  background: rgba(0,0,0,0.05);
+  background: rgba(201,162,39,0.08);
 }
 html.light-mode .auth-tab { color: var(--muted); }
 html.light-mode .auth-tab.active {
@@ -2321,31 +2432,37 @@ html.light-mode #auth-switch-hint button { color: var(--muted); }
 
 /* Mobile drawer */
 html.light-mode #mobile-drawer {
-  background: var(--bg2);
-  border-left: 1px solid var(--border);
+  background: linear-gradient(158deg, #EEF1E8 0%, #E4EAE0 100%);
+  border-left: 1px solid rgba(201,162,39,0.22);
 }
-html.light-mode #drawer-links a { color: var(--cream); }
-html.light-mode #nav-overlay { background: rgba(0,0,0,0.3); }
+html.light-mode #drawer-links a { color: var(--cream); font-weight: 500; }
+html.light-mode #nav-overlay { background: rgba(10,18,15,0.35); }
 
 /* Info / footer */
-html.light-mode #info { background: var(--bg2); }
+html.light-mode #info {
+  background:
+    radial-gradient(ellipse 75% 55% at 85% 100%, rgba(122,158,142,0.13) 0%, transparent 55%),
+    linear-gradient(158deg, #EDF0E9 0%, #E2E8DC 100%);
+}
 html.light-mode #footer-bottom {
-  border-top-color: var(--border);
+  border-top-color: rgba(201,162,39,0.20);
   color: var(--muted);
 }
 html.light-mode .info-col a { color: var(--gold); }
+html.light-mode .info-col p,
+html.light-mode .info-col span { color: #2A3A34; }
 
 /* Section divider */
 html.light-mode .section-divider {
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  background: linear-gradient(90deg, transparent, rgba(201,162,39,0.30), transparent);
 }
 
-/* Smooth global theme transition */
+/* Global theme transition */
 body, nav, section, .mood-card, #auth-modal, #mobile-drawer,
 .squad-card, .journal-entry, #journal-composer, #journal-locked,
 .mc-game-container, .mc-game-header, #game-player, #sf-loader {
-  transition: background 0.38s ease, color 0.38s ease,
-              border-color 0.38s ease, box-shadow 0.38s ease;
+  transition: background 0.35s ease, color 0.35s ease,
+              border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2555,12 +2672,29 @@ body, nav, section, .mood-card, #auth-modal, #mobile-drawer,
 }
 
 /* Light mode overrides for supermario section */
-html.light-mode #supermario { background: var(--bg2); }
-html.light-mode .sm-hud { background: rgba(240,236,227,0.97); border-color: var(--border); }
-html.light-mode .sm-controls-bar { background: rgba(240,236,227,0.97); border-color: var(--border); }
-html.light-mode .sm-win-box { background: var(--bg2); }
-html.light-mode .sm-touch-controls { background: rgba(240,236,227,0.8); }
-html.light-mode .sm-game-wrapper { box-shadow: 0 0 30px rgba(184,135,42,0.1); }
+html.light-mode #supermario {
+  background:
+    radial-gradient(ellipse 70% 50% at 30% 60%, rgba(160,200,140,0.14) 0%, transparent 55%),
+    linear-gradient(160deg, #e8dfc8 0%, #ddd4b6 100%);
+}
+html.light-mode .sm-hud {
+  background: rgba(238,232,210,0.97);
+  border-color: rgba(138,94,0,0.25);
+  color: #1a1508;
+}
+html.light-mode .sm-controls-bar {
+  background: rgba(238,232,210,0.97);
+  border-color: rgba(138,94,0,0.25);
+}
+html.light-mode .sm-win-box {
+  background: linear-gradient(145deg, #f5efde, #eae0ca);
+  border-color: rgba(138,94,0,0.30);
+  box-shadow: 0 20px 60px rgba(80,50,0,0.20);
+}
+html.light-mode .sm-touch-controls { background: rgba(238,232,210,0.85); }
+html.light-mode .sm-game-wrapper {
+  box-shadow: 0 0 40px rgba(138,94,0,0.18), 0 0 0 1px rgba(138,94,0,0.12);
+}
 
 @media (max-width: 860px) {
   #supermario { padding: 6rem 1.5rem 3rem; }
